@@ -99,12 +99,14 @@ def incomplete_fov_check(
     run_file_path = os.path.join(bin_file_dir, run_name + ".json")
     run_metadata = read_json_file(run_file_path, encoding="utf-8")
 
-    # get fov and channel info
-    fovs = io_utils.list_folders(extraction_dir, "fov")
+    # TODO: list_folders does not handle cases such as "fov0" correctly
+    # need to add a fix in to alpineer to deal with this
+    fovs = [f for f in os.listdir(extraction_dir) if "fov" in f]
+
+    # NOTE: the specifically-named "Au" channel is no longer be assumed to be present
+    # simply check the first "num_channels" channels found
     channels = io_utils.list_files(os.path.join(extraction_dir, fovs[0]), ".tiff")
     channels_subset = channels[:num_channels]
-    if "Au.tiff" not in channels_subset:
-        channels_subset = channels_subset[:-1] + ["Au.tiff"]
 
     incomplete_fovs = {}
     for fov in fovs:

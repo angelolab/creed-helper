@@ -153,10 +153,15 @@ def test_incomplete_fov_check():
 
         # change fov-2 to have zero values in the bottom of image
         fov2_data = load_utils.load_imgs_from_tree(extraction_dir, fovs=["fov-2-scan-1"])
-        fov2_data[:, 10:, :, 0] = 0
+        fov2_data_partial = fov2_data.copy()
+        fov2_data_partial[:, 10:, :, :] = 0
         image_utils.save_image(
             os.path.join(extraction_dir, "fov-2-scan-1", "Au.tiff"),
-            fov2_data.loc["fov-2-scan-1", :, :, "Au"],
+            fov2_data_partial.loc["fov-2-scan-1", :, :, "Au"],
+        )
+        image_utils.save_image(
+            os.path.join(extraction_dir, "fov-2-scan-1", "chan2.tiff"),
+            fov2_data_partial.loc["fov-2-scan-1", :, :, "chan2"],
         )
 
         # test warning for partial fovs (checking 1 channel img)
@@ -173,6 +178,11 @@ def test_incomplete_fov_check():
             )
 
         # test that increasing the number of channels to check causes no warning
+        # NOTE: this case specifically tests if only a subset of channels are partially imaged
+        image_utils.save_image(
+            os.path.join(extraction_dir, "fov-2-scan-1", "chan2.tiff"),
+            fov2_data.loc["fov-2-scan-1", :, :, "chan2"],
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             bin_extraction.incomplete_fov_check(
