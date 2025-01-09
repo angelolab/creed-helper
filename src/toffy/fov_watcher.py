@@ -50,14 +50,14 @@ class RunStructure:
         )
 
         # parse run_metadata and populate expected structure
-        for fov in run_metadata.get("fovs", ()):
+        for fov in run_metadata["rois"][0].get("fovs", ()):
             run_order = fov.get("runOrder", -1)
             scan = fov.get("scanCount", -1)
             if run_order * scan < 0:
                 raise KeyError(f"Could not locate keys in {run_folder}.json")
 
             # scan 2's don't contain significant imaging data per new MIBI specs
-            fov_name = f"fov-{run_order}-scan-1"
+            fov_name = f"fov-0{run_order}-scan-1" if run_order < 10 else f"fov-0{run_order}-scan-1"
             if fov.get("standardTarget", "") == "Molybdenum Foil":
                 self.moly_points.append(fov_name)
 
